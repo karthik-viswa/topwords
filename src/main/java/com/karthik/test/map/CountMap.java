@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CountMap {
 
-    private static final int INITIAL_CAPACITY = 4;
+    private static final int INITIAL_CAPACITY = 16;
 
     private List<CountEntry> buckets;
 
@@ -23,27 +23,8 @@ public class CountMap {
     }
 
     public void put(char[] word, int count) {
-        //CountEntry existingEntry = getEntry(word);
 
         CountEntry newEntry = new CountEntry(word, count);
-
-//        if(existingEntry != null) {
-//            CountEntry prevEntry = existingEntry.getPrev();
-//            if(prevEntry != null) {
-//                prevEntry.setNext(newEntry);
-//            }
-//            else {
-//
-//            }
-//
-//            newEntry.setPrev(prevEntry);
-//            newEntry.setNext(existingEntry.getNext());
-//
-//            existingEntry.setPrev(null);
-//            existingEntry.setNext(null);
-//
-//            return;
-//        }
 
         int targetHash = Arrays.hashCode(word) & 0x7fffffff;
         int bucketNumber = targetHash % capacity;

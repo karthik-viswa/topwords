@@ -32,6 +32,10 @@ public class CountEntry {
         this.count = count;
     }
 
+    public char[] getWord() {
+        return word;
+    }
+
     public CountEntry getNext() {
         return next;
     }
@@ -67,9 +71,6 @@ public class CountEntry {
 
     @Override
     public String toString() {
-        return "{" +
-                "word=" + Arrays.toString(word) +
-                ", count=" + count +
-                '}';
+        return count + " " + Arrays.toString(word);
     }
 }

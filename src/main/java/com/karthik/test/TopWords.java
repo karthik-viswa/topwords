@@ -1,37 +1,32 @@
 package com.karthik.test;
 
-import com.karthik.test.count.WordCountEntry;
+import com.karthik.test.map.CountEntry;
 import com.karthik.test.map.CountMap;
+import com.karthik.test.sort.CountEntrySorter;
 
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class TopWords
 {
     public static void main(String[] args)
     {
-//        if(args.length == 0)
-//        {
-//            System.out.println("You must supply the path to the file");
-//            return;
-//        }
-
-        List<Word>  words = new ArrayList<>();
+        if(args.length == 0)
+        {
+            System.out.println("You must supply the path to the file");
+            return;
+        }
 
         CountMap wordCounts = new CountMap();
 
-        List<WordCountEntry> allCounts = new ArrayList<>();
-
-        // use this if using array
-        WordCountEntry[] allCountsArr = new WordCountEntry[words.size()];
-
         try
         {
-            String filePath = "/Users/Karthik/Work/topwords/src/main/resources/test2.txt"; //args[0];
+            String filePath = args[0];
             BufferedInputStream in = new BufferedInputStream(Files.newInputStream(Paths.get(filePath)));
             byte[] chunk = new byte[1000];
 
@@ -41,27 +36,21 @@ public class TopWords
             {
                 char[] characters = getCharactersFromChunk(chunk, bytesRead);
 
-                Word word = new Word();
-
                 char[] wordBuffer = new char[characters.length];
                 int bufferIndex = 0;
 
                 for(char ch : characters) {
-                    if(ch == '\u0000' || ch == ',' || ch == '.') {
+                    if(ch != ' ' && (!Character.isLetterOrDigit(ch) || ch == '\u0000')) {
                         continue;
                     }
                     if(ch == ' ') {
                         char[] wordArray = new char[bufferIndex];
                         System.arraycopy(wordBuffer, 0, wordArray, 0, wordArray.length);
 
-                        word.setChars(wordArray);
                         wordBuffer = new char[characters.length];
                         bufferIndex = 0;
-                        words.add(word);
 
-                        countWord(wordCounts, word);
-
-                        word = new Word();
+                        countWord(wordCounts, wordArray);
                     }
                     else {
                         wordBuffer[bufferIndex++] = ch;
@@ -72,15 +61,22 @@ public class TopWords
                     char[] wordArray = new char[bufferIndex];
                     System.arraycopy(wordBuffer, 0, wordArray, 0, wordArray.length);
 
-                    word.setChars(wordArray);
-                    words.add(word);
-
-                    countWord(wordCounts, word);
+                    countWord(wordCounts, wordArray);
                 }
-                //chunk = new byte[1000];
+                chunk = new byte[1000];
             }
-            System.out.println("Words:\n" + words);
-            System.out.println("Word counts:\n" + wordCounts);
+
+            //System.out.println("Word counts:\n" + wordCounts);
+
+            List<CountEntry> entries = wordCounts.getEntries();
+
+            final CountEntry[] orderedWords = entries.toArray(new CountEntry[entries.size()]);
+
+            new CountEntrySorter().sort(orderedWords);
+
+            int displaySize = orderedWords.length >= 20? 20 : orderedWords.length;
+
+            IntStream.range(0, displaySize).forEach(i -> display(orderedWords[i]));
         }
         catch (FileNotFoundException e)
         {
@@ -92,20 +88,11 @@ public class TopWords
         }
     }
 
-//    private static void countWord(final Map<Word, Integer> wordCounts, final Word word)
-//    {
-//        Integer newValue = wordCounts.computeIfPresent(word, (key, value) -> value + 1);
-//        if (newValue == null)
-//        {
-//            wordCounts.put(word, 1);
-//        }
-//    }
-
-    private static void countWord(final CountMap wordCounts, final Word word)
+    private static void countWord(final CountMap wordCounts, char[] word)
     {
-        int existingCount = wordCounts.get(word.getChars());
+        int existingCount = wordCounts.get(word);
 
-        wordCounts.put(word.getChars(), ++existingCount);
+        wordCounts.put(word, ++existingCount);
     }
 
     private static char[] getCharactersFromChunk(final byte[] chunk, final int bytesRead)
@@ -124,7 +111,7 @@ public class TopWords
                 }
             }
             else {
-                characters[chIndex++] = ch;
+                characters[chIndex++] = Character.toLowerCase(ch);
                 whitespaceMode = true;
             }
         }
@@ -132,8 +119,11 @@ public class TopWords
         return characters;
     }
 
-    List<Word> makeWords(byte[] bytes)
-    {
-        return null;
+    private static void display(CountEntry entry) {
+        System.out.print(entry.getCount() + " ");
+
+        char[] word = entry.getWord();
+        IntStream.range(0, word.length).forEach(i -> System.out.print(word[i]));
+        System.out.println();
     }
 }
