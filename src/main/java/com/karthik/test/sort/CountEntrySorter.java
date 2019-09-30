@@ -21,12 +21,9 @@ public class CountEntrySorter {
             return;
         }
 
-//        CountEntry[] entriesArray = new CountEntry[entries.size()];
-//        entriesArray = entries.toArray(entriesArray);
+        // could change this to choose the most appropriate sorting algorithm based on the size of the array
 
         quickSort(entries, 0, entries.length-1, ascending? COUNT_LESS_THAN_OR_EQUAL : COUNT_GREATER);
-
-        //entries = Arrays.asList(entriesArray);
     }
 
     private void quickSort(CountEntry arr[], int begin, int end, BiPredicate<CountEntry, CountEntry> compare) {
