@@ -61,7 +61,7 @@ public class CountMap {
                         prevEntry.setNext(newEntry);
                     }
                     newEntry.setPrev(prevEntry);
-                    newEntry.setNext(entry.getPrev());
+                    newEntry.setNext(entry.getNext());
 
                     entry.setPrev(null);
                     entry.setNext(null);
